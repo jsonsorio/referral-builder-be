@@ -4,9 +4,27 @@ import ContactModel from "../models/contact";
 import createHttpError from "http-errors";
 
 export const getContacts: RequestHandler = async (req, res, next) => {
+    
+    // Get the page number from the query parameters (default to page 1)
+    const page = parseInt(req.query.page as string) || 1;
+    const perPage = parseInt(req.query.perPage as string) || 10;
+    
+    // Calculate the start and end indexes for the current page
+    const startIndex = (page - 1) * perPage;
+    const endIndex = page * perPage;
+
     try {
         const contacts = await ContactModel.find().exec();
-        res.status(200).json(contacts);
+
+        // Slice the items array to get the items for the current page
+        const pageItems = contacts.slice(startIndex, endIndex);
+
+        res.status(200).json({
+            total: contacts.length,
+            countPerPage: pageItems.length,
+            currentPage: page,
+            items: pageItems,
+        });
     } catch (error) {
         next(error);
     }
@@ -40,17 +58,48 @@ interface CreateContactBody {
     lastname?: string;
     email?: string;
     phone?: string;
+    addressline1?: string;
+    addressline2?: string;
+    suburb?: string;
+    state?: string;
+    postcode?: string;
+    country?: string;
+}
+
+const requiredFields: (keyof CreateContactBody)[] = [
+    'firstname',
+    'lastname',
+    'email',
+    'phone',
+    'addressline1',
+    'suburb',
+    'state',
+    'postcode',
+    'country',
+];
+
+function validateRequiredFields(body: CreateContactBody): string[] {
+    const missingFields: string[] = [];
+    for (const field of requiredFields) {
+        if (!body[field]) {
+        missingFields.push(field);
+        }
+    }
+    return missingFields;
 }
 
 export const createContact: RequestHandler<unknown, unknown, CreateContactBody, unknown> = async (req, res, next) => {
-    const { firstname, lastname, email, phone } = req.body;
+    const contactData = req.body;
     try {
         // check for required fields
-        if (!firstname || !lastname || !phone) {
-            throw createHttpError(400, "Missing one or more of required fields: firstname, lastname, phone number");
+        const missingFields = validateRequiredFields(contactData);
+
+        if (missingFields.length > 0) {
+            const errorMessage = `Missing required fields: ${missingFields.join(', ')}`;
+            return next(createHttpError(400, errorMessage));
         }
 
-        const newContact = await ContactModel.create({ firstname, lastname, email, phone });
+        const newContact = await ContactModel.create(contactData);
         res.status(201).json(newContact);
     } catch (error) {
         next(error);
@@ -66,11 +115,17 @@ interface UpdateContactBody {
     lastname?: string;
     email?: string;
     phone?: string;
+    addressline1?: string;
+    addressline2?: string;
+    suburb?: string;
+    state?: string;
+    postcode?: string;
+    country?: string;
 }
 
 export const updateContact: RequestHandler<UpdateContactParams, unknown, UpdateContactBody, unknown> = async (req, res, next) => {
     const contactId = req.params.contactId;
-    const { firstname, lastname, email, phone } = req.body;
+    const { firstname, lastname, email, phone, addressline1, addressline2, suburb, state, postcode, country } = req.body;
 
     try {
         // check for valid ID
@@ -85,22 +140,18 @@ export const updateContact: RequestHandler<UpdateContactParams, unknown, UpdateC
             throw createHttpError(404, "Contact not found");
         }
 
-        if (firstname) {
-            contact.firstname = firstname;
-        }
-
-        if (lastname) {
-            contact.lastname = lastname;
-        }
-
-        if (email) {
-            contact.email = email;
-        }
-
-        if (phone) {
-            contact.phone = phone;
-        }
-
+        // update contact
+        if (firstname) contact.firstname = firstname;
+        if (lastname) contact.lastname = lastname;
+        if (email) contact.email = email;
+        if (phone) contact.phone = phone;
+        if (addressline1) contact.addressline1 = addressline1;
+        if (addressline2) contact.addressline2 = addressline2;
+        if (suburb) contact.suburb = suburb;
+        if (state) contact.state = state;
+        if (postcode) contact.postcode = postcode;
+        if (country) contact.country = country;
+        
         const updatedContact = await contact.save();
 
         res.status(200).json(updatedContact);

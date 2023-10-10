@@ -2,7 +2,7 @@ import "dotenv/config";
 import express, { NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
 import createHttpError, { isHttpError } from 'http-errors';
-import contactsRoutes from './routes/contacts';
+import referralsRoutes from './routes/referrals';
 
 const app = express();
 
@@ -10,7 +10,7 @@ app.use(morgan("dev"));
 
 app.use(express.json());
 
-app.use("/api/contacts", contactsRoutes);
+app.use("/api/referrals", referralsRoutes);
 
 app.use((req, res, next) => {
     next(createHttpError(404, "Endpoint not found"));

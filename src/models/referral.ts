@@ -1,6 +1,6 @@
 import { InferSchemaType, Schema, model } from "mongoose";
 
-const contactSchema = new Schema({
+const referralSchema = new Schema({
   firstname: {
     type: String,
     required: true,
@@ -44,6 +44,6 @@ const contactSchema = new Schema({
   },
 }, {timestamps: true});
 
-type Contact = InferSchemaType<typeof contactSchema>;
+type Referral = InferSchemaType<typeof referralSchema>;
 
-export default model<Contact>("Contact", contactSchema);
+export default model<Referral>("Referral", referralSchema);

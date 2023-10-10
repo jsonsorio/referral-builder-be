@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-interface Contact {
+interface Referral {
     firstname?: string;
     lastname?: string;
     email?: string;
@@ -14,8 +14,8 @@ interface Contact {
 }
 
 // Function to generate fake user data
-export default function generateFakeContact(num: number): Contact[] {
-    const contacts: Contact[] = [];
+export default function generateFakeReferral(num: number): Referral[] {
+    const referrals: Referral[] = [];
 
     const firstname = faker.person.firstName();
     const lastname = faker.person.lastName();
@@ -29,8 +29,8 @@ export default function generateFakeContact(num: number): Contact[] {
     const country = faker.location.country();
 
     for (let i = 0; i < num; i++) {
-        contacts.push({firstname, lastname, email, phone, addressline1, addressline2, suburb, state, postcode, country});
+        referrals.push({firstname, lastname, email, phone, addressline1, addressline2, suburb, state, postcode, country});
     }
 
-    return contacts;
+    return referrals;
 }

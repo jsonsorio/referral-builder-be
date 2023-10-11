@@ -17,7 +17,7 @@ export const getReferrals: RequestHandler = async (req, res, next) => {
     try {
         let referrals;
 
-        // Search for referrals if search query is present
+        // Search for referrals by displayed values matching the search string
         if (search) {
             referrals = await ReferralModel.find({
                 $or: [
@@ -25,12 +25,6 @@ export const getReferrals: RequestHandler = async (req, res, next) => {
                     { lastname: { $regex: search, $options: 'i' } },
                     { email: { $regex: search, $options: 'i' } },
                     { phone: { $regex: search, $options: 'i' } },
-                    { addressline1: { $regex: search, $options: 'i' } },
-                    { addressline2: { $regex: search, $options: 'i' } },
-                    { suburb: { $regex: search, $options: 'i' } },
-                    { state: { $regex: search, $options: 'i' } },
-                    { postcode: { $regex: search, $options: 'i' } },
-                    { country: { $regex: search, $options: 'i' } },
                 ]
             }).exec();
         } else {

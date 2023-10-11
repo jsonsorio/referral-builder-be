@@ -26,9 +26,9 @@ export const getReferrals: RequestHandler = async (req, res, next) => {
                     { email: { $regex: search, $options: 'i' } },
                     { phone: { $regex: search, $options: 'i' } },
                 ]
-            }).exec();
+            }).sort({ createdAt: -1 }).exec();
         } else {
-            referrals = await ReferralModel.find().exec();
+            referrals = await ReferralModel.find().sort({ createdAt: -1 }).exec();
         }
 
         // Slice the items array to get the items for the current page

@@ -8,13 +8,34 @@ export const getReferrals: RequestHandler = async (req, res, next) => {
     // Get the page number from the query parameters (default to page 1)
     const page = parseInt(req.query.page as string) || 1;
     const perPage = parseInt(req.query.perPage as string) || 10;
+    const search = req.query.search as string;
     
     // Calculate the start and end indexes for the current page
     const startIndex = (page - 1) * perPage;
     const endIndex = page * perPage;
 
     try {
-        const referrals = await ReferralModel.find().exec();
+        let referrals;
+
+        // Search for referrals if search query is present
+        if (search) {
+            referrals = await ReferralModel.find({
+                $or: [
+                    { firstname: { $regex: search, $options: 'i' } },
+                    { lastname: { $regex: search, $options: 'i' } },
+                    { email: { $regex: search, $options: 'i' } },
+                    { phone: { $regex: search, $options: 'i' } },
+                    { addressline1: { $regex: search, $options: 'i' } },
+                    { addressline2: { $regex: search, $options: 'i' } },
+                    { suburb: { $regex: search, $options: 'i' } },
+                    { state: { $regex: search, $options: 'i' } },
+                    { postcode: { $regex: search, $options: 'i' } },
+                    { country: { $regex: search, $options: 'i' } },
+                ]
+            }).exec();
+        } else {
+            referrals = await ReferralModel.find().exec();
+        }
 
         // Slice the items array to get the items for the current page
         const pageItems = referrals.slice(startIndex, endIndex);
